@@ -1,150 +1,94 @@
-// script.js
+let carritoCount = 0;
 
-// Conectamos los elementos principales del HTML con el DOM para poder manipularlos
-const contenedorProductos = document.getElementById('productos-container');
-const formularioContacto = document.getElementById('form-contacto');
-const btnCargar = document.getElementById('btn-cargar');
-const contadorCarritoEl = document.getElementById('contador-carrito');
-const feedbackCompraEl = document.getElementById('feedback-compra');
+const juegosEjemplo = [
+    { id: 1, titulo: "Elden Ring", precio: 49990, img: "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=400" },
+    { id: 2, titulo: "Cyberpunk 2077", precio: 39990, img: "https://images.unsplash.com/photo-1538481199705-c710c4e965fc?w=400" },
+    { id: 3, titulo: "Hollow Knight", precio: 12990, img: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=400" },
+    { id: 4, titulo: "Baldur's Gate 3", precio: 59990, img: "https://images.unsplash.com/photo-1612287230202-1ff1d85d1bdf?w=400" }
+];
 
-let cantidadCarrito = 0;
-const TASA_CLP = 950; // Tasa referencial USD a pesos chilenos
+const formatterCLP = new Intl.NumberFormat('es-CL', {
+    style: 'currency',
+    currency: 'CLP'
+});
 
-// Diccionario para traducir los títulos de la API al español de manera limpia
-const traduccionesEspanol = {
-    1: "Mochila Fjallraven - Foldsack No. 1 (para 15 Laptops)",
-    2: "Polera Casual Slim Fit Premium para Hombre",
-    3: "Chaqueta de Algodón para Hombre",
-    4: "Polera Casual Slim Fit"
-};
-
-/**
- * Función auxiliar para convertir USD a Pesos Chilenos (CLP)
- */
-function convertirAPesosChilenos(precioUSD) {
-    const valorCLP = Math.round(precioUSD * TASA_CLP);
-    return new Intl.NumberFormat('es-CL', {
-        style: 'currency',
-        currency: 'CLP',
-        minimumFractionDigits: 0
-    }).format(valorCLP);
-}
-
-/**
- * Arma dinámicamente la tarjeta visual de un producto, aplicando traducción,
- * conversión a pesos chilenos, efectos de mouse (mouseover/mouseout) y la lógica del botón de compra.
- */
-function crearTarjetaProducto(producto) {
-    // Tomamos la traducción si existe, o dejamos el título original por seguridad
-    const tituloFinal = traduccionesEspanol[producto.id] || producto.title;
-    const precioCLP = convertirAPesosChilenos(producto.price);
-
-    // Creación del elemento contenedor en el DOM
-    const card = document.createElement('div');
-    card.style.border = '1px solid #e0e0e0';
-    card.style.borderRadius = '8px';
-    card.style.background = '#fff';
-    card.style.padding = '16px';
-    card.style.display = 'flex';
-    card.style.flexDirection = 'column';
-    card.style.justifyContent = 'space-between';
-    card.style.boxShadow = '0 2px 4px rgba(0,0,0,0.05)';
-    card.style.transition = 'transform 0.2s ease, background-color 0.2s ease';
-
-    // Eventos de mouse: realce visual al pasar el cursor (hover)
-    card.addEventListener('mouseover', () => {
-        card.style.backgroundColor = '#f4f6f8';
-        card.style.transform = 'translateY(-4px)';
-    });
-    card.addEventListener('mouseout', () => {
-        card.style.backgroundColor = '#fff';
-        card.style.transform = 'translateY(0)';
-    });
-
-    // Inyectamos el contenido estructurado de la tarjeta con precio en CLP
-    card.innerHTML = `
-        <div style="text-align: center; margin-bottom: 12px;">
-            <img src="${producto.image}" alt="${tituloFinal}" style="height: 110px; object-fit: contain; width: 100%;">
-        </div>
-        <div>
-            <h4 style="font-size: 14px; margin: 0 0 8px 0; color: #222; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;" title="${tituloFinal}">${tituloFinal}</h4>
-            <p style="font-size: 16px; color: #d32f2f; margin: 8px 0;"><strong>${precioCLP}</strong></p>
-        </div>
-        <button class="btn-comprar" style="width: 100%; padding: 8px; background: #1976d2; color: #fff; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">Comprar</button>
-    `;
-
-    // Manejo de eventos de clic para actualizar el carrito y dar feedback visual
-    const btnComprar = card.querySelector('.btn-comprar');
-    btnComprar.addEventListener('click', () => {
-        cantidadCarrito++;
-        contadorCarritoEl.textContent = `🛒 Carrito: ${cantidadCarrito}`;
-        feedbackCompraEl.textContent = `✨ Agregado al carrito: ${tituloFinal.slice(0, 35)}...`;
+function renderJuegos(lista) {
+    const container = document.getElementById('productos-container');
+    if (!container) return;
+    container.innerHTML = '';
+    
+    lista.forEach(juego => {
+        const card = document.createElement('div');
+        card.className = 'card-juego';
+        card.style.cssText = 'background: #1f1f1f; border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; border: 1px solid #333; transition: transform 0.2s, background-color 0.2s, border-color 0.2s; cursor: pointer;';
         
-        setTimeout(() => {
-            feedbackCompraEl.textContent = '';
-        }, 3500);
-    });
+        card.innerHTML = `
+            <img src="${juego.img}" alt="${juego.titulo}" style="width: 100%; height: 140px; object-fit: cover;">
+            <div style="padding: 15px; display: flex; flex-direction: column; flex: 1; justify-content: space-between;">
+                <div>
+                    <h3 style="margin: 0 0 10px 0; font-size: 1.1rem; color: #fff;">${juego.titulo}</h3>
+                    <p style="margin: 0; color: #00bcd4; font-weight: bold;">${formatterCLP.format(juego.precio)}</p>
+                </div>
+                <button class="btn-comprar" data-id="${juego.id}" style="margin-top: 15px; padding: 8px; background: #e91e63; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">Agregar al Carrito</button>
+            </div>
+        `;
 
-    return card;
-}
-
-/**
- * Consulta la Fake Store API mediante Fetch, manejando promesas y errores de red,
- * y luego inserta los elementos resultantes en el DOM.
- */
-function cargarDatosExternos() {
-    if (!contenedorProductos) return;
-    contenedorProductos.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #666;">Cargando catálogo dinámico...</p>';
-
-    fetch('https://fakestoreapi.com/products?limit=4')
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Error al conectar con la API');
-            }
-            return response.json();
-        })
-        .then(productos => {
-            contenedorProductos.innerHTML = ''; // Limpiamos mensaje de carga
-            productos.forEach(prod => {
-                const tarjeta = crearTarjetaProducto(prod);
-                contenedorProductos.appendChild(tarjeta); // Inserción en el DOM
-            });
-        })
-        .catch(error => {
-            console.error('Falló el fetch:', error);
-            contenedorProductos.innerHTML = `<p style="color: red; grid-column: 1/-1;">No se pudieron cargar los datos externos.</p>`;
+        // Efecto hover y selección grisácea visual
+        card.addEventListener('mouseenter', () => {
+            card.style.backgroundColor = '#2a2a2a';
+            card.style.borderColor = '#00bcd4';
+            card.style.transform = 'translateY(-4px)';
         });
+        card.addEventListener('mouseleave', () => {
+            card.style.backgroundColor = '#1f1f1f';
+            card.style.borderColor = '#333';
+            card.style.transform = 'translateY(0)';
+        });
+
+        container.appendChild(card);
+    });
+
+    agregarEventosBotones();
 }
 
-/**
- * Configura el formulario de contacto interceptando el submit para validar
- * y evitar que la página se recargue por defecto.
- */
-function configurarFormulario() {
-    if (!formularioContacto) return;
-
-    formularioContacto.addEventListener('submit', (event) => {
-        event.preventDefault(); // Evitamos recarga por defecto
-        const nombreInput = document.getElementById('nombre');
-        const msgForm = document.getElementById('msg-form');
-
-        if (nombreInput.value.trim() === '') {
-            msgForm.textContent = 'Por favor, ingresa tu nombre válido.';
-            msgForm.style.color = '#d32f2f';
-            return;
-        }
-
-        msgForm.textContent = `¡Gracias, ${nombreInput.value}! Suscripción registrada con éxito.`;
-        msgForm.style.color = '#2e7d32';
-        formularioContacto.reset();
+function agregarEventosBotones() {
+    document.querySelectorAll('.btn-comprar').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation(); // Evita conflictos con la tarjeta
+            carritoCount++;
+            const contadorEl = document.getElementById('contador-carrito');
+            if (contadorEl) contadorEl.textContent = `🛒 Carrito: ${carritoCount}`;
+            const feedback = document.getElementById('feedback-compra');
+            if (feedback) {
+                feedback.textContent = '¡Juego agregado al carrito!';
+                setTimeout(() => { feedback.textContent = ''; }, 2500);
+            }
+        });
     });
 }
 
-// Inicializamos toda la lógica interactiva cuando el DOM termina de cargar
+// Asegurar ejecución cuando carga el DOM
 document.addEventListener('DOMContentLoaded', () => {
-    configurarFormulario();
+    const btnCargar = document.getElementById('btn-cargar');
     if (btnCargar) {
-        btnCargar.addEventListener('click', cargarDatosExternos);
+        btnCargar.addEventListener('click', () => {
+            renderJuegos(juegosEjemplo);
+        });
     }
-    cargarDatosExternos();
+
+    const formContacto = document.getElementById('form-contacto');
+    if (formContacto) {
+        formContacto.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const nombreInput = document.getElementById('nombre');
+            const msgForm = document.getElementById('msg-form');
+            if (nombreInput && msgForm) {
+                msgForm.textContent = `¡Gracias por suscribirte, ${nombreInput.value}!`;
+                e.target.reset();
+            }
+        });
+    }
+
+    // Carga inicial obligatoria
+    renderJuegos(juegosEjemplo);
 });

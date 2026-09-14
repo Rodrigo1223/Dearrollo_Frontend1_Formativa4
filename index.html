@@ -1,0 +1,37 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-commerce Interactivo</title>
+</head>
+<body style="font-family: Arial, sans-serif; margin: 0; background: #fafafa; color: #333;">
+    <header style="display: flex; justify-content: space-between; align-items: center; padding: 15px 30px; background: #1a1a1a; color: #fff;">
+        <h1 style="margin: 0; font-size: 1.5rem;">Mi Tienda Web</h1>
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <span id="contador-carrito" style="background: #e91e63; color: white; padding: 6px 14px; border-radius: 20px; font-size: 0.9rem; font-weight: bold;">🛒 Carrito: 0</span>
+            <button id="btn-cargar" style="padding: 8px 16px; background: #00bcd4; color: #000; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">Actualizar Catálogo</button>
+        </div>
+    </header>
+
+    <main style="max-width: 1200px; margin: 25px auto; padding: 0 20px;">
+        <div id="feedback-compra" style="margin-bottom: 15px; font-weight: bold; min-height: 24px; color: #2e7d32;"></div>
+        
+        <section id="productos-container" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 20px;">
+            <!-- Contenido dinámico mediante JS -->
+        </section>
+
+        <section style="margin-top: 50px; background: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <h2 style="margin-top: 0;">Contacto / Suscripción</h2>
+            <form id="form-contacto" style="display: flex; gap: 10px; max-width: 400px;">
+                <input type="text" id="nombre" placeholder="Tu nombre" required style="flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
+                <button type="submit" style="padding: 10px 20px; background: #333; color: #fff; border: none; border-radius: 4px; cursor: pointer;">Enviar</button>
+            </form>
+            <p id="msg-form" style="margin-top: 12px; font-weight: bold;"></p>
+        </section>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
